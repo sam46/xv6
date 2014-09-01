@@ -110,8 +110,8 @@ section .text
  		lgdt [REBASE(gdt16_ptr)]               ; load 16bit gdt pointer
 
 
-; 		jmp  word CODE16:REBASE(p_mode16)      ; switch to 16bit selector (16bit protected mode)
-; 	p_mode16: use16
+		jmp  word CODE16:REBASE(p_mode16)      ; switch to 16bit selector (16bit protected mode)
+ 	p_mode16: use16
 ; 		mov  ax, DATA16                        ; get our 16bit data selector
 ; 		mov  ds, ax                            ; set ds to 16bit selector
 ; 		mov  es, ax                            ; set es to 16bit selector
@@ -153,8 +153,8 @@ section .text
 ; 		mov  eax, cr0                          ; get cr0 so we can modify it
 ; 		inc  eax                               ; set PE bit to turn on protected mode
 ; 		mov  cr0, eax                          ; set cr0 to result
-; 		jmp  dword CODE32:REBASE(p_mode32)     ; switch to 32bit selector (32bit protected mode)
-; 	p_mode32: use32
+ 		jmp  dword CODE32:REBASE(p_mode32)     ; switch to 32bit selector (32bit protected mode)
+ 	p_mode32: use32
 ; 		mov  ax, DATA32                        ; get our 32bit data selector
 ; 		mov  ds, ax                            ; reset ds selector
 ; 		mov  es, ax                            ; reset es selector
