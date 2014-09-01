@@ -14,6 +14,9 @@
 #include "file.h"
 #include "fcntl.h"
 
+#include "int32.h"
+
+
 // Fetch the nth word-sized system call argument as a file descriptor
 // and return both the descriptor and the corresponding struct file.
 static int
@@ -318,11 +321,29 @@ sys_open(void)
   return fd;
 }
 
+
+pte_t biosmap();
+void biosunmap(pte_t original);
+
 int
 sys_mkdir(void)
 {
   char *path;
   struct inode *ip;
+
+  regs16_t regs;
+  cprintf("proc: %d",proc);
+  //pte_t original = 
+  biosmap();
+  regs.ax = 0x3;
+  int32(0x10,&regs);
+  
+//  regs.ax = 0x03;
+//  int32(0x10,&regs);
+  
+//  biosunmap(original);
+  
+  cprintf("proc: %d",proc);
 
   begin_trans();
   if(argstr(0, &path) < 0 || (ip = create(path, T_DIR, 0, 0)) == 0){
