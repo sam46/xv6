@@ -57,6 +57,9 @@ endstruc
 %define DATA16                                 GDTENTRY(4)	; 0x20
 %define STACK16                                (INT32_BASE - regs16_t_size)
 
+; jakob added these - handy constants copied from xv6 mmu.h, don't want to mess with cross-syntax includes
+%define CR0_PG				       0x80000000
+%define CR0_WP				       0x00010000
 
 section .text
 	int32: use32                               ; by Napalm
@@ -68,20 +71,35 @@ section .text
 		mov  ecx, (int32_end - reloc)          ; set copy size to our codes size
 		cld                                    ; clear direction flag (so we copy forward)
 		rep  movsb                             ; do the actual copy (relocate code to low 16bit space)
+
+	prejump:
 		jmp INT32_BASE                         ; jump to new code location
+
 	reloc: use32                               ; by Napalm
+
 		mov  [REBASE(stack32_ptr)], esp        ; save 32bit stack pointer
 		sidt [REBASE(idt32_ptr)]               ; save 32bit idt pointer
 		sgdt [REBASE(gdt32_ptr)]               ; save 32bit gdt pointer
-		lgdt [REBASE(gdt16_ptr)]               ; load 16bit gdt pointer
+
 		lea  esi, [esp+0x24]                   ; set position of intnum on 32bit stack
 		lodsd                                  ; read intnum into eax
 		mov  [REBASE(ib)], al                  ; set intrrupt immediate byte from our arguments 
+
 		mov  esi, [esi]                        ; read regs pointer in esi as source
 		mov  edi, STACK16                      ; set destination to 16bit stack
 		mov  ecx, regs16_t_size                ; set copy size to our struct size
 		mov  esp, edi                          ; save destination to as 16bit stack offset
 		rep  movsb                             ; do the actual copy (32bit stack to 16bit stack)
+
+	pagedis:		; jakob added this - disable paging temporarily
+		mov  eax, cr0
+		xor  eax, CR0_PG|CR0_WP
+		mov  cr0, eax
+	postdis:
+
+		lgdt [REBASE(gdt16_ptr)]               ; load 16bit gdt pointer
+
+
 		jmp  word CODE16:REBASE(p_mode16)      ; switch to 16bit selector (16bit protected mode)
 	p_mode16: use16
 		mov  ax, DATA16                        ; get our 16bit data selector
@@ -129,11 +147,22 @@ section .text
 		mov  ax, DATA32                        ; get our 32bit data selector
 		mov  ds, ax                            ; reset ds selector
 		mov  es, ax                            ; reset es selector
-		mov  fs, ax                            ; reset fs selector
-		mov  gs, ax                            ; reset gs selector
 		mov  ss, ax                            ; reset ss selector
+
+		mov  ax, 0x18			       ; CPU-local selector
+		mov  gs, ax                            ; reset gs selector
+		mov  fs, ax                            ; reset fs selector
+
+;% not at all sure about the ordering here. it panics with this ordering, but reboots if you set the segment registers before loading GDT
+% do we need to save our cr3 somewhere? there is the assumption that paging is off in this code
+% check the linear address of the gdt, make sure it's not at 0x7d00! 
+% check if the GDT itself is being modified by these calls. 
+
 		lgdt [REBASE(gdt32_ptr)]               ; restore 32bit gdt pointer
 		lidt [REBASE(idt32_ptr)]               ; restore 32bit idt pointer
+
+
+
 		mov  esp, [REBASE(stack32_ptr)]        ; restore 32bit stack pointer
 		mov  esi, STACK16                      ; set copy source to 16bit stack
 		lea  edi, [esp+0x28]                   ; set position of regs pointer on 32bit stack
@@ -141,8 +170,18 @@ section .text
 		mov  ecx, regs16_t_size                ; set copy size to our struct size
 		cld                                    ; clear direction flag (so we copy forward)
 		rep  movsb                             ; do the actual copy (16bit stack to 32bit stack)
+
+;% some cleanup is still wrong - when we return, "proc" is broken, probably due to some mistake related to %gs
+;% %gs actually has the right value, so perhaps the problem has to do with the GDT that is now in place
+
+		; jakob added this - enable paging again
+		mov  eax, cr0
+		or   eax, CR0_PG|CR0_WP
+		mov  cr0, eax
+
 		popa                                   ; restore registers
 		sti                                    ; enable interrupts
+
 		ret                                    ; return to caller
 		
 	resetpic:                                  ; reset's 8259 master and slave pic vectors
@@ -163,7 +202,7 @@ section .text
 		out  0xA1, al                          ; send ICW4 to slave pic
 		pop  ax                                ; restore ax from stack
 		ret                                    ; return to caller
-		
+
 	stack32_ptr:                               ; address in 32bit stack after we
 		dd 0x00000000                          ;   save all general purpose registers
 		
@@ -218,7 +257,7 @@ section .text
 			
 	gdt16_ptr:                                 ; GDT table pointer for 16bit access
 		dw gdt16_ptr - gdt16_base - 1          ; table limit (size)
-		dd gdt16_base                          ; table base address
+		dd REBASE(gdt16_base)                          ; table base address
 		
 	int32_end:                                 ; end marker (so we can copy the code)
 

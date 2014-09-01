@@ -14,6 +14,9 @@
 #include "file.h"
 #include "fcntl.h"
 
+#include "int32.h"
+
+
 // Fetch the nth word-sized system call argument as a file descriptor
 // and return both the descriptor and the corresponding struct file.
 static int
@@ -329,6 +332,10 @@ sys_open(void)
   f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
   return fd;
 }
+
+
+pte_t biosmap();
+void biosunmap(pte_t original);
 
 int
 sys_mkdir(void)
