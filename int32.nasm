@@ -128,28 +128,28 @@ section .text
  		mov  ds, ax                            ; set ds so we can access idt16
  		mov  ss, ax                            ; set ss so they the stack is valid
  		lidt [REBASE(idt16_ptr)]               ; load 16bit idt
-; 		mov  bx, 0x0870                        ; master 8 and slave 112
-; 		call resetpic                          ; set pic's the to real-mode settings
-; 		popa                                   ; load general purpose registers from 16bit stack
-; 		pop  gs                                ; load gs from 16bit stack
-; 		pop  fs                                ; load fs from 16bit stack
-; 		pop  es                                ; load es from 16bit stack
+ 		mov  bx, 0x0870                        ; master 8 and slave 112
+ 		call resetpic                          ; set pic's the to real-mode settings
+ 		popa                                   ; load general purpose registers from 16bit stack
+ 		pop  gs                                ; load gs from 16bit stack
+ 		pop  fs                                ; load fs from 16bit stack
+ 		pop  es                                ; load es from 16bit stack
 ; 		pop  ds                                ; load ds from 16bit stack
-; 		sti                                    ; enable interrupts
+ 		sti                                    ; enable interrupts
 ; 		db 0xCD                                ; opcode of INT instruction with immediate byte
 ; 	ib: db 0x00
-; 		cli                                    ; disable interrupts
-; 		xor  sp, sp                            ; zero sp so we can reuse it
-; 		mov  ss, sp                            ; set ss so the stack is valid
-; 		mov  sp, INT32_BASE                    ; set correct stack position so we can copy back
-; 		pushf                                  ; save eflags to 16bit stack
+ 		cli                                    ; disable interrupts
+ 		xor  sp, sp                            ; zero sp so we can reuse it
+ 		mov  ss, sp                            ; set ss so the stack is valid
+ 		mov  sp, INT32_BASE                    ; set correct stack position so we can copy back
+ 		pushf                                  ; save eflags to 16bit stack
 ; 		push ds                                ; save ds to 16bit stack
-; 		push es                                ; save es to 16bit stack
-; 		push fs                                ; save fs to 16bit stack
-; 		push gs                                ; save gs to 16bit stack
-; 		pusha                                  ; save general purpose registers to 16bit stack
-; 		mov  bx, 0x2028                        ; master 32 and slave 40
-; 		call resetpic                          ; restore the pic's to protected mode settings
+ 		push es                                ; save es to 16bit stack
+ 		push fs                                ; save fs to 16bit stack
+ 		push gs                                ; save gs to 16bit stack
+ 		pusha                                  ; save general purpose registers to 16bit stack
+ 		mov  bx, 0x2028                        ; master 32 and slave 40
+ 		call resetpic                          ; restore the pic's to protected mode settings
 
  		mov  eax, cr0                          ; get cr0 so we can modify it
  		inc  eax                               ; set PE bit to turn on protected mode
@@ -178,20 +178,6 @@ section .text
  		mov  gs, ax                            ; reset gs selector
  		mov  fs, ax                            ; reset fs selector
 
-; ;% not at all sure about the ordering here. it panics with this ordering, but reboots if you set the segment registers before loading GDT
-; ;% do we need to save our cr3 somewhere? there is the assumption that paging is off in this code
-; ; NOPE: checked that cr3 remains unchanged
-
-; ;% check the linear address of the gdt, make sure it's not at 0x7d00! 
-; ;% check if the GDT itself is being modified by these calls. 
-
-; ;ok, looks like we're a bit closer. apparently, when paging is enabled, lgdt takes virtual addresses.
-; ;still don't know why proc returns the wrong result all of a sudden after this.
-; ;gs has the right value, so it seems like it must be the segments that are all screwy, but everything looks fine!
-; ;I guess it is still possible that we're overwriting the actual GDT. should check all the individual gdt values next
-
-
-
 		mov  esp, [REBASE(stack32_ptr)]        ; restore 32bit stack pointer
 		mov  esi, STACK16                      ; set copy source to 16bit stack
 		lea  edi, [esp+0x28]                   ; set position of regs pointer on 32bit stack
@@ -199,10 +185,6 @@ section .text
 		mov  ecx, regs16_t_size                ; set copy size to our struct size
 		cld                                    ; clear direction flag (so we copy forward)
 		rep  movsb                             ; do the actual copy (16bit stack to 32bit stack)
-
-;% some cleanup is still wrong - when we return, "proc" is broken, probably due to some mistake related to %gs
-;% %gs actually has the right value, so perhaps the problem has to do with the GDT that is now in place
-
 
 		popa                                   ; restore registers
 		sti                                    ; enable interrupts
