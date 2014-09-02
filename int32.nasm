@@ -96,15 +96,15 @@ section .text
 		mov  cr3, eax
 	 postdis:
 
- ;		lea  esi, [esp+0x24]                   ; set position of intnum on 32bit stack
- ;		lodsd                                  ; read intnum into eax
-; 		mov  [REBASE(ib)], al                  ; set intrrupt immediate byte from our arguments 
+ 		lea  esi, [esp+0x24]                   ; set position of intnum on 32bit stack
+ 		lodsd                                  ; read intnum into eax
+ ;		mov  [REBASE(ib)], al                  ; set intrrupt immediate byte from our arguments 
 
- ;		mov  esi, [esi]                        ; read regs pointer in esi as source
- ;		mov  edi, STACK16                      ; set destination to 16bit stack
- ;		mov  ecx, regs16_t_size                ; set copy size to our struct size
- ;		mov  esp, edi                          ; save destination to as 16bit stack offset
- ;		rep  movsb                             ; do the actual copy (32bit stack to 16bit stack)
+ 		mov  esi, [esi]                        ; read regs pointer in esi as source
+ 		mov  edi, STACK16                      ; set destination to 16bit stack
+ 		mov  ecx, regs16_t_size                ; set copy size to our struct size
+ 		mov  esp, edi                          ; save destination to as 16bit stack offset
+ 		rep  movsb                             ; do the actual copy (32bit stack to 16bit stack)
 
 
  		lgdt [REBASE(gdt16_ptr)]               ; load 16bit gdt pointer
@@ -112,21 +112,22 @@ section .text
 
 		jmp  word CODE16:REBASE(p_mode16)      ; switch to 16bit selector (16bit protected mode)
  	p_mode16: use16
-; 		mov  ax, DATA16                        ; get our 16bit data selector
-; 		mov  ds, ax                            ; set ds to 16bit selector
-; 		mov  es, ax                            ; set es to 16bit selector
-; 		mov  fs, ax                            ; set fs to 16bit selector
-; 		mov  gs, ax                            ; set gs to 16bit selector
-; 		mov  ss, ax                            ; set ss to 16bit selector
-; 		mov  eax, cr0                          ; get cr0 so we can modify it
-; 		and  al,  ~0x01                        ; mask off PE bit to turn off protected mode
-; 		mov  cr0, eax                          ; set cr0 to result
-; 		jmp  word 0x0000:REBASE(r_mode16)      ; finally set cs:ip to enter real-mode
-; 	r_mode16: use16
-; 		xor  ax, ax                            ; set ax to zero
-; 		mov  ds, ax                            ; set ds so we can access idt16
-; 		mov  ss, ax                            ; set ss so they the stack is valid
-; 		lidt [REBASE(idt16_ptr)]               ; load 16bit idt
+ 		mov  ax, DATA16                        ; get our 16bit data selector
+ 		mov  ds, ax                            ; set ds to 16bit selector
+ 		mov  es, ax                            ; set es to 16bit selector
+ 		mov  fs, ax                            ; set fs to 16bit selector
+ 		mov  gs, ax                            ; set gs to 16bit selector
+ 		mov  ss, ax                            ; set ss to 16bit selector
+
+ 		mov  eax, cr0                          ; get cr0 so we can modify it
+ 		and  al,  ~0x01                        ; mask off PE bit to turn off protected mode
+ 		mov  cr0, eax                          ; set cr0 to result
+ 		jmp  word 0x0000:REBASE(r_mode16)      ; finally set cs:ip to enter real-mode
+ 	r_mode16: use16
+ 		xor  ax, ax                            ; set ax to zero
+ 		mov  ds, ax                            ; set ds so we can access idt16
+ 		mov  ss, ax                            ; set ss so they the stack is valid
+ 		lidt [REBASE(idt16_ptr)]               ; load 16bit idt
 ; 		mov  bx, 0x0870                        ; master 8 and slave 112
 ; 		call resetpic                          ; set pic's the to real-mode settings
 ; 		popa                                   ; load general purpose registers from 16bit stack
@@ -150,19 +151,32 @@ section .text
 ; 		mov  bx, 0x2028                        ; master 32 and slave 40
 ; 		call resetpic                          ; restore the pic's to protected mode settings
 
-; 		mov  eax, cr0                          ; get cr0 so we can modify it
-; 		inc  eax                               ; set PE bit to turn on protected mode
-; 		mov  cr0, eax                          ; set cr0 to result
+ 		mov  eax, cr0                          ; get cr0 so we can modify it
+ 		inc  eax                               ; set PE bit to turn on protected mode
+ 		mov  cr0, eax                          ; set cr0 to result
+
  		jmp  dword CODE32:REBASE(p_mode32)     ; switch to 32bit selector (32bit protected mode)
  	p_mode32: use32
-; 		mov  ax, DATA32                        ; get our 32bit data selector
-; 		mov  ds, ax                            ; reset ds selector
-; 		mov  es, ax                            ; reset es selector
-; 		mov  ss, ax                            ; reset ss selector
+       		 ; put correct cr3 back
+		 mov  eax, [REBASE(cr3_saved)]
+		 mov  cr3, eax
 
-; 		mov  ax, 0x18			       ; CPU-local selector
-; 		mov  gs, ax                            ; reset gs selector
-; 		mov  fs, ax                            ; reset fs selector
+		 ; jakob added this - enable paging again
+		 mov  eax, cr0
+		 or   eax, CR0_PG|CR0_WP
+		 mov  cr0, eax
+
+		lgdt [REBASE(gdt32_ptr)]               ; restore 32bit gdt pointer
+		lidt [REBASE(idt32_ptr)]               ; restore 32bit idt pointer
+
+ 		mov  ax, DATA32                        ; get our 32bit data selector
+ 		mov  ds, ax                            ; reset ds selector
+ 		mov  es, ax                            ; reset es selector
+ 		mov  ss, ax                            ; reset ss selector
+
+ 		mov  ax, 0x18			       ; CPU-local selector
+ 		mov  gs, ax                            ; reset gs selector
+ 		mov  fs, ax                            ; reset fs selector
 
 ; ;% not at all sure about the ordering here. it panics with this ordering, but reboots if you set the segment registers before loading GDT
 ; ;% do we need to save our cr3 somewhere? there is the assumption that paging is off in this code
@@ -177,18 +191,6 @@ section .text
 ; ;I guess it is still possible that we're overwriting the actual GDT. should check all the individual gdt values next
 
 
-       		 ; put correct cr3 back
-		 mov  eax, [REBASE(cr3_saved)]
-		 mov  cr3, eax
-
-		 ; jakob added this - enable paging again
-		 mov  eax, cr0
-		 or   eax, CR0_PG|CR0_WP
-		 mov  cr0, eax
-
-
-		lgdt [REBASE(gdt32_ptr)]               ; restore 32bit gdt pointer
-		lidt [REBASE(idt32_ptr)]               ; restore 32bit idt pointer
 
 		mov  esp, [REBASE(stack32_ptr)]        ; restore 32bit stack pointer
 		mov  esi, STACK16                      ; set copy source to 16bit stack
