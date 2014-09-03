@@ -10,7 +10,9 @@ void biosunmap(pte_t original);
 
 // tell compiler our int32 function is external
 extern void int32(unsigned char intnum, regs16_t *regs);
- 
+
+extern void bios_int(unsigned char intnum, regs16_t* regs);
+
 // int32 test
 /*void int32_test()
 {
