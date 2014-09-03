@@ -195,7 +195,7 @@ section .text
 		rep  movsb                             ; do the actual copy (16bit stack to 32bit stack)
 
 		popa                                   ; restore registers
-		sti                                    ; enable interrupts
+;		sti                                    ; enable interrupts
 
 		ret                                    ; return to caller
 		

@@ -88,8 +88,6 @@ void biosunmap(pte_t original) {
   *va8000 = 0;
 }
 
-
-
 // Create PTEs for virtual addresses starting at va that refer to
 // physical addresses starting at pa. va and size might not
 // be page-aligned.

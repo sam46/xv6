@@ -3,10 +3,16 @@ typedef struct __attribute__ ((packed)) {
     unsigned short di, si, bp, sp, bx, dx, cx, ax;
     unsigned short gs, fs, es, ds, eflags;
 } regs16_t;
- 
+
+// Map some lowmem pages for BIOS call purposes. The implementations of these live in vm.c for now. 
+pte_t biosmap();
+void biosunmap(pte_t original);
+
 // tell compiler our int32 function is external
 extern void int32(unsigned char intnum, regs16_t *regs);
- 
+
+extern void bios_int(unsigned char intnum, regs16_t* regs);
+
 // int32 test
 /*void int32_test()
 {

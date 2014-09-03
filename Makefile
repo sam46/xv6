@@ -5,6 +5,7 @@ OBJS = \
 	file.o\
 	fs.o\
 	ide.o\
+	bios_int.o\
 	ioapic.o\
 	kalloc.o\
 	kbd.o\
@@ -15,6 +16,7 @@ OBJS = \
 	picirq.o\
 	pipe.o\
 	proc.o\
+	screen_saver.o\
 	spinlock.o\
 	string.o\
 	swtch.o\
