@@ -363,7 +363,6 @@ sys_mkdir(void)
    
   biosunmap(original);
 
-  begin_trans();
   begin_op();
   if(argstr(0, &path) < 0 || (ip = create(path, T_DIR, 0, 0)) == 0){
     end_op();
