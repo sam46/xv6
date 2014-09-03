@@ -16,7 +16,6 @@ OBJS = \
 	picirq.o\
 	pipe.o\
 	proc.o\
-	screen_saver.o\
 	spinlock.o\
 	string.o\
 	swtch.o\
