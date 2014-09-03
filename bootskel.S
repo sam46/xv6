@@ -9,6 +9,7 @@ _start:
 	movb $7,%bl
 	int $0x10
 
+stop:
 	jmp start
 
 .org 0x7dfe
