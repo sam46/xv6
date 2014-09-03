@@ -335,9 +335,6 @@ sys_open(void)
 }
 
 
-pte_t biosmap();
-void biosunmap(pte_t original);
-
 int
 sys_mkdir(void)
 {
