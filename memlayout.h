@@ -1,7 +1,5 @@
 // Memory layout
 
-#ifndef V2P
-
 #define EXTMEM  0x100000            // Start of extended memory
 #define PHYSTOP 0xE000000           // Top physical memory
 #define DEVSPACE 0xFE000000         // Other devices are at high addresses
@@ -22,5 +20,3 @@ static inline void *p2v(uint a) { return (void *) ((a) + KERNBASE); }
 
 #define V2P_WO(x) ((x) - KERNBASE)    // same as V2P, but without casts
 #define P2V_WO(x) ((x) + KERNBASE)    // same as V2P, but without casts
-
-#endif

@@ -342,7 +342,6 @@ int
 sys_mkdir(void)
 {
   char *path;
-  int i;
   struct inode *ip;
 
   begin_op();
