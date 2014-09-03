@@ -81,7 +81,17 @@ section .text
  		sidt [REBASE(idt32_ptr)]               ; save 32bit idt pointer
  		sgdt [REBASE(gdt32_ptr)]               ; save 32bit gdt pointer
 
-	 pagedis:		; jakob added this - disable paging temporarily
+ 		lea  esi, [esp+0x24]                   ; set position of intnum on 32bit stack
+ 		lodsd                                  ; read intnum into eax
+ 		mov  [REBASE(ib)], al                  ; set intrrupt immediate byte from our arguments 
+
+ 		mov  esi, [esi]                        ; read regs pointer in esi as source
+ 		mov  edi, STACK16                      ; set destination to 16bit stack
+ 		mov  ecx, regs16_t_size                ; set copy size to our struct size
+ 		mov  esp, edi                          ; save destination to as 16bit stack offset
+ 		rep  movsb                             ; do the actual copy (32bit stack to 16bit stack)
+
+	 pagedis:		; disable paging temporarily
 	 	; save away old CR3 value for later, then clear CR3 to flush TLB
 	 	mov  eax, cr3
 	 	mov  [REBASE(cr3_saved)],eax
@@ -95,16 +105,6 @@ section .text
 	 	mov  eax, $0
 		mov  cr3, eax
 	 postdis:
-
- 		lea  esi, [esp+0x24]                   ; set position of intnum on 32bit stack
- 		lodsd                                  ; read intnum into eax
- ;		mov  [REBASE(ib)], al                  ; set intrrupt immediate byte from our arguments 
-
- 		mov  esi, [esi]                        ; read regs pointer in esi as source
- 		mov  edi, STACK16                      ; set destination to 16bit stack
- 		mov  ecx, regs16_t_size                ; set copy size to our struct size
- 		mov  esp, edi                          ; save destination to as 16bit stack offset
- 		rep  movsb                             ; do the actual copy (32bit stack to 16bit stack)
 
 
  		lgdt [REBASE(gdt16_ptr)]               ; load 16bit gdt pointer
@@ -129,27 +129,35 @@ section .text
  		mov  ss, ax                            ; set ss so they the stack is valid
  		lidt [REBASE(idt16_ptr)]               ; load 16bit idt
  		mov  bx, 0x0870                        ; master 8 and slave 112
- 		call resetpic                          ; set pic's the to real-mode settings
+ 		call resetpic16                          ; set pic's the to real-mode settings
  		popa                                   ; load general purpose registers from 16bit stack
  		pop  gs                                ; load gs from 16bit stack
  		pop  fs                                ; load fs from 16bit stack
  		pop  es                                ; load es from 16bit stack
-; 		pop  ds                                ; load ds from 16bit stack
- 		sti                                    ; enable interrupts
-; 		db 0xCD                                ; opcode of INT instruction with immediate byte
-; 	ib: db 0x00
- 		cli                                    ; disable interrupts
+ 		pop  ds                                ; load ds from 16bit stack
+; jakob - interrupts are kept disabled for the duration of the BIOS call.
+;         this is to avoid running into trouble with any interrupts that should've been delivered to xv6.
+;         the final solution here should probably do something much more clever. I suspect many BIOS calls
+;         will not work under these conditions. Perhaps 
+;           (a) waiting for any pending interrupts to happen, 
+;           (b) stopping the timer, and 
+;           (c) masking any non-essential interrupts would be a good start.
+;
+;		sti                                    ; enable interrupts
+ 		db 0xCD                                ; opcode of INT instruction with immediate byte
+ 	ib: db 0x00
+ ;		cli                                    ; disable interrupts
  		xor  sp, sp                            ; zero sp so we can reuse it
  		mov  ss, sp                            ; set ss so the stack is valid
  		mov  sp, INT32_BASE                    ; set correct stack position so we can copy back
  		pushf                                  ; save eflags to 16bit stack
-; 		push ds                                ; save ds to 16bit stack
+ 		push ds                                ; save ds to 16bit stack
  		push es                                ; save es to 16bit stack
  		push fs                                ; save fs to 16bit stack
  		push gs                                ; save gs to 16bit stack
  		pusha                                  ; save general purpose registers to 16bit stack
  		mov  bx, 0x2028                        ; master 32 and slave 40
- 		call resetpic                          ; restore the pic's to protected mode settings
+ 		call resetpic32                          ; restore the pic's to protected mode settings
 
  		mov  eax, cr0                          ; get cr0 so we can modify it
  		inc  eax                               ; set PE bit to turn on protected mode
@@ -191,7 +199,7 @@ section .text
 
 		ret                                    ; return to caller
 		
-	resetpic:                                  ; reset's 8259 master and slave pic vectors
+	resetpic16:                                  ; reset's 8259 master and slave pic vectors
 		push ax                                ; expects bh = master vector, bl = slave vector
 		mov  al, 0x11                          ; 0x11 = ICW1_INIT | ICW1_ICW4
 		out  0x20, al                          ; send ICW1 to master pic
@@ -204,7 +212,29 @@ section .text
 		out  0x21, al                          ; send ICW3 to master pic
 		shr  al, 1                             ; 0x02 = tell slave its on IRQ2 of master
 		out  0xA1, al                          ; send ICW3 to slave pic
+
 		shr  al, 1                             ; 0x01 = ICW4_8086
+		out  0x21, al                          ; send ICW4 to master pic
+		out  0xA1, al                          ; send ICW4 to slave pic
+		pop  ax                                ; restore ax from stack
+		ret                                    ; return to caller
+
+	resetpic32:                                  ; reset's 8259 master and slave pic vectors
+		push ax                                ; expects bh = master vector, bl = slave vector
+		mov  al, 0x11                          ; 0x11 = ICW1_INIT | ICW1_ICW4
+		out  0x20, al                          ; send ICW1 to master pic
+		out  0xA0, al                          ; send ICW1 to slave pic
+		mov  al, bh                            ; get master pic vector param
+		out  0x21, al                          ; send ICW2 aka vector to master pic
+		mov  al, bl                            ; get slave pic vector param
+		out  0xA1, al                          ; send ICW2 aka vector to slave pic
+		mov  al, 0x04                          ; 0x04 = set slave to IRQ2
+		out  0x21, al                          ; send ICW3 to master pic
+		shr  al, 1                             ; 0x02 = tell slave its on IRQ2 of master
+		out  0xA1, al                          ; send ICW3 to slave pic
+
+		mov  ax, 0x3
+;		shr  al, 1                             ; 0x01 = ICW4_8086
 		out  0x21, al                          ; send ICW4 to master pic
 		out  0xA1, al                          ; send ICW4 to slave pic
 		pop  ax                                ; restore ax from stack

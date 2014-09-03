@@ -83,7 +83,9 @@ pte_t biosmap() {
 }
 void biosunmap(pte_t original) {
   pte_t* va7c00 = walkpgdir(proc->pgdir,(void*)0x7c00,1); 
-  *va7c00 = original;
+  *va7c00 = 0;
+  pte_t* va8000 = walkpgdir(proc->pgdir,(void*)0x8000,1); 
+  *va8000 = 0;
 }
 
 

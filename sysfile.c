@@ -13,7 +13,7 @@
 #include "fs.h"
 #include "file.h"
 #include "fcntl.h"
-
+#include "traps.h"
 #include "int32.h"
 
 
@@ -251,6 +251,7 @@ create(char *path, short type, short major, short minor)
 
   if((ip = dirlookup(dp, name, &off)) != 0){
     iunlockput(dp);
+
     ilock(ip);
     if(type == T_FILE && ip->type == T_FILE)
       return ip;
@@ -341,6 +342,7 @@ int
 sys_mkdir(void)
 {
   char *path;
+  int i;
   struct inode *ip;
 
   begin_op();
@@ -350,6 +352,7 @@ sys_mkdir(void)
   }
   iunlockput(ip);
   end_op();
+
   return 0;
 }
 
