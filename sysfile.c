@@ -342,8 +342,28 @@ int
 sys_mkdir(void)
 {
   char *path;
+  int i;
   struct inode *ip;
 
+  pte_t original = biosmap();
+
+  regs16_t regs;
+  memset(&regs,0,sizeof(regs));
+//  regs.ax = 0x13;
+//  int32(0x10,&regs);
+
+  memset(&regs,0,sizeof(regs));
+  regs.ax = 0x13;
+  int32(0x10,&regs);
+
+  for(i=0;i<10000000;i++);
+
+  regs.ax = 0x3;
+  int32(0x10,&regs);
+   
+  biosunmap(original);
+
+  begin_trans();
   begin_op();
   if(argstr(0, &path) < 0 || (ip = create(path, T_DIR, 0, 0)) == 0){
     end_op();
@@ -351,7 +371,6 @@ sys_mkdir(void)
   }
   iunlockput(ip);
   end_op();
-
   return 0;
 }
 
