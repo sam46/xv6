@@ -1,10 +1,9 @@
-.org 0x7c00
 .code16
 .globl start
 start:
 _start:
 	movb $0x0e,%ah
-        movb $'A',%al
+        movb thestring,%al
 	movb $0,%bh
 	movb $7,%bl
 	int $0x10
@@ -12,5 +11,8 @@ _start:
 stop:
 	jmp start
 
-.org 0x7dfe
+thestring:
+	.string "Hello World"
+
+.org 0x01fe
  .word 0xAA55
