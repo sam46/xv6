@@ -1,4 +1,3 @@
-.org 0x7c00
 .code16
 .globl start
 start:
@@ -12,5 +11,5 @@ _start:
 stop:
 	jmp start
 
-.org 0x7dfe
+.org 0x01fe
  .word 0xAA55
