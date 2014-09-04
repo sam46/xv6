@@ -276,8 +276,7 @@ tar:
 
 bootskel.img: bootskel.S
 	as bootskel.S -o bootskel.o
-	ld -e start bootskel.o -o bootskellinked.o
-	objcopy -O binary bootskellinked.o bootskel
-	dd if=bootskel of=bootskel.img bs=512 count=1 skip=62
+	ld -Ttext=0x7c00 -e start bootskel.o -o bootskellinked.o
+	objcopy -O binary bootskellinked.o bootskel.img
 
 .PHONY: dist-test dist
