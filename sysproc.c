@@ -55,6 +55,15 @@ sys_sbrk(void)
   return addr;
 }
 
+int sys_mmap() {
+  int fd;
+  if(argint(0,&fd) < 0) {
+    return -1;
+  }
+  cprintf("mmapping fd %d\n",fd);
+  return 0;
+}
+
 int
 sys_sleep(void)
 {
