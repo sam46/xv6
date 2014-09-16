@@ -165,7 +165,8 @@ UPROGS=\
 	_kill\
 	_ln\
 	_ls\
-	_mmaptest\
+	_eager_mmap\
+	_lazy_mmap\
 	_mkdir\
 	_rm\
 	_sh\
