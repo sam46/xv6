@@ -57,10 +57,11 @@ sys_sbrk(void)
 
 int sys_mmap() {
   int fd;
-  if(argint(0,&fd) < 0) {
+  int flags;
+  if(argint(0,&fd) < 0 || argint(1,&flags) < 0) {
     return -1;
   }
-  cprintf("mmapping fd %d\n",fd);
+  cprintf("mmapping fd %d with %s\n",fd,(flags==0?"eager":"lazy"));
   return 0;
 }
 
