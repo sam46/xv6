@@ -13,7 +13,7 @@ struct cpu {
   
   // Cpu-local storage variables; see below
   struct cpu *cpu;
-  struct proc *proc;           // The currently-running process.
+  struct thread *current;           // The currently-running process.
 };
 
 extern struct cpu cpus[NCPU];
@@ -28,7 +28,7 @@ extern int ncpu;
 // This is similar to how thread-local variables are implemented
 // in thread libraries such as Linux pthreads.
 extern struct cpu *cpu asm("%gs:0");       // &cpus[cpunum()]
-extern struct proc *proc asm("%gs:4");     // cpus[cpunum()].proc
+extern struct thread *current asm("%gs:4");     // cpus[cpunum()].current
 
 //PAGEBREAK: 17
 // Saved registers for kernel context switches.
@@ -51,21 +51,26 @@ struct context {
 
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
-// Per-process state
-struct proc {
+struct protoproc {
   uint sz;                     // Size of process memory (bytes)
+  int pid;                     // Process ID
   pde_t* pgdir;                // Page table
+  struct file *ofile[NOFILE];  // Open files
+  struct inode *cwd;           // Current directory
+  char name[16];               // Process name (debugging)  
+  int killed;                  // If non-zero, have been killed
+  struct protoproc *parent;    // Parent process
+};
+
+// Per-process state
+struct thread {
+  struct protoproc* proc;
+  struct protoproc  temporarilyhere;
   char *kstack;                // Bottom of kernel stack for this process
   enum procstate state;        // Process state
-  int pid;                     // Process ID
-  struct proc *parent;         // Parent process
   struct trapframe *tf;        // Trap frame for current syscall
   struct context *context;     // swtch() here to run process
   void *chan;                  // If non-zero, sleeping on chan
-  int killed;                  // If non-zero, have been killed
-  struct file *ofile[NOFILE];  // Open files
-  struct inode *cwd;           // Current directory
-  char name[16];               // Process name (debugging)
 };
 
 // Process memory is laid out contiguously, low addresses first:

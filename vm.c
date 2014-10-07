@@ -36,7 +36,7 @@ seginit(void)
   
   // Initialize cpu-local storage.
   cpu = c;
-  proc = 0;
+  current = 0;
 }
 
 // Return the address of the PTE in page table pgdir
@@ -162,13 +162,13 @@ switchkvm(void)
 
 // Switch TSS and h/w page table to correspond to process p.
 void
-switchuvm(struct proc *p)
+switchuvm(struct protoproc *p)
 {
   pushcli();
   cpu->gdt[SEG_TSS] = SEG16(STS_T32A, &cpu->ts, sizeof(cpu->ts)-1, 0);
   cpu->gdt[SEG_TSS].s = 0;
   cpu->ts.ss0 = SEG_KDATA << 3;
-  cpu->ts.esp0 = (uint)proc->kstack + KSTACKSIZE;
+  cpu->ts.esp0 = (uint)current->kstack + KSTACKSIZE;
   ltr(SEG_TSS << 3);
   if(p->pgdir == 0)
     panic("switchuvm: no pgdir");
