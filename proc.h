@@ -51,7 +51,7 @@ struct context {
 
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
-struct protoproc {
+struct proc {
   uint sz;                     // Size of process memory (bytes)
   int pid;                     // Process ID
   pde_t* pgdir;                // Page table
@@ -59,13 +59,13 @@ struct protoproc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)  
   int killed;                  // If non-zero, have been killed
-  struct protoproc *parent;    // Parent process
+  struct proc *parent;    // Parent process
 };
 
 // Per-process state
 struct thread {
-  struct protoproc* proc;
-  struct protoproc  temporarilyhere;
+  struct proc* proc;
+  struct proc  temporarilyhere;
   char *kstack;                // Bottom of kernel stack for this process
   enum procstate state;        // Process state
   struct trapframe *tf;        // Trap frame for current syscall
