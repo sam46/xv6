@@ -175,6 +175,12 @@ fork(void)
   return pid;
 }
 
+int 
+clone(void (*function)(void), char* stack) {
+  cprintf("didn't clone squat.\n");
+  return 0;
+}
+
 // Exit the current process.  Does not return.
 // An exited process remains in the zombie state
 // until its parent calls wait() to find out it exited.

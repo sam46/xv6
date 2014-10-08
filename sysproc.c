@@ -13,6 +13,21 @@ sys_fork(void)
 }
 
 int
+sys_clone(void) 
+{
+  void (*function)(void);
+  char* stack;
+
+  if(argint(0,(int*)&function)<0)
+    return -1;
+
+  if(argint(1,(int*)&stack)<0)
+    return -1;
+  
+  return clone(function,stack);
+}
+
+int
 sys_exit(void)
 {
   exit();
