@@ -173,6 +173,7 @@ UPROGS=\
 	_wc\
 	_zombie\
 	_thread1\
+	_thread2\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
