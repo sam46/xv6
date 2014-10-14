@@ -176,6 +176,8 @@ UPROGS=\
 	_thread2\
 	_thread3\
 	_thread4\
+	_thread5\
+	_thread5_helper\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)

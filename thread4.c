@@ -12,5 +12,7 @@ int main(int argc, char** argv) {
   int t = thread_create(f);
   thread_join(t);
   printf(1,"shared = %d\n",shared);
+
+  while(1);
   return 0;
 }
