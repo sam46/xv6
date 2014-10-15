@@ -13,6 +13,5 @@ int main(int argc, char** argv) {
   thread_join(t);
   printf(1,"shared = %d\n",shared);
 
-  while(1);
   return 0;
 }
