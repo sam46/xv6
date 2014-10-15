@@ -175,6 +175,7 @@ UPROGS=\
 	_thread1\
 	_thread2\
 	_thread3\
+	_thread3b\
 	_thread4\
 	_thread5\
 	_thread5_helper\

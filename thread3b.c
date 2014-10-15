@@ -6,6 +6,11 @@ int shared = 1;
 void f(void) {
   while(shared<10000000) shared++;
   printf(1,"Done looping\n");
+
+  // a little artificial wait to force the race condition to happen
+  int i=1000000000;
+  while(i--);
+
 }
 
 int main(int argc, char** argv) {
@@ -19,11 +24,6 @@ int main(int argc, char** argv) {
     }
   }
   printf(1,"Main is done!\n"); 
-
-  // a little artificial wait: this is a completely bogus way of resolving
-  // the race condition where the main thread may exit before f().
-  int i=1000000000;
-  while(i--);
 
   exit();
   return 0;
