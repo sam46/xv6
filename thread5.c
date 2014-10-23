@@ -15,6 +15,7 @@ int main(int argc, char** argv) {
   int i=10000;
   while(i--);
 
-  exec("thread5_helper",0);
+  char *dummyargs[] = {0};
+  exec("thread5_helper",dummyargs);
   return 0;
 }
