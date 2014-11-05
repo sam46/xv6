@@ -135,7 +135,7 @@ sys_link(void)
   }
 
   ip->nlink++;
-  iupdate(ip);
+  ip->i_func->iupdate(ip);
   iunlock(ip);
 
   if((dp = nameiparent(new, name)) == 0)
@@ -155,7 +155,7 @@ sys_link(void)
 bad:
   ilock(ip);
   ip->nlink--;
-  iupdate(ip);
+  ip->i_func->iupdate(ip);
   iunlockput(ip);
   end_op();
   return -1;
@@ -217,12 +217,12 @@ sys_unlink(void)
     panic("unlink: writei");
   if(ip->type == T_DIR){
     dp->nlink--;
-    iupdate(dp);
+    dp->i_func->iupdate(dp);
   }
   iunlockput(dp);
 
   ip->nlink--;
-  iupdate(ip);
+  ip->i_func->iupdate(ip);
   iunlockput(ip);
 
   end_op();
@@ -262,11 +262,11 @@ create(char *path, short type, short major, short minor)
   ip->major = major;
   ip->minor = minor;
   ip->nlink = 1;
-  iupdate(ip);
+  ip->i_func->iupdate(ip);
 
   if(type == T_DIR){  // Create . and .. entries.
     dp->nlink++;  // for ".."
-    iupdate(dp);
+    dp->i_func->iupdate(dp);
     // No ip->nlink++ for ".": avoid cyclic ref count.
     if(dirlink(ip, ".", ip->inum) < 0 || dirlink(ip, "..", dp->inum) < 0)
       panic("create dots");

@@ -25,8 +25,7 @@ static void itrunc(struct inode*);
 
 // fs inode functions
 
-void fs_ipopulate(struct inode* ip);
-struct inode_functions fs_i_func = { fs_ipopulate, fs_readi, fs_writei };      
+struct inode_functions fs_i_func = { fs_ipopulate, fs_iupdate, fs_readi, fs_writei };      
 
 // Read the super block.
 void
@@ -204,7 +203,7 @@ ialloc(uint dev, short type, struct inode* parent)
 
 // Copy a modified in-memory inode to disk.
 void
-iupdate(struct inode *ip)
+fs_iupdate(struct inode *ip)
 {
   struct buf *bp;
   struct dinode *dip;
@@ -346,7 +345,7 @@ iput(struct inode *ip)
     release(&icache.lock);
     itrunc(ip);
     ip->type = 0;
-    iupdate(ip);
+    ip->i_func->iupdate(ip);
     acquire(&icache.lock);
     ip->flags = 0;
     wakeup(ip);
@@ -435,7 +434,7 @@ itrunc(struct inode *ip)
   }
 
   ip->size = 0;
-  iupdate(ip);
+  ip->i_func->iupdate(ip);
 }
 
 // Copy stat information from inode.
@@ -506,7 +505,7 @@ fs_writei(struct inode *ip, char *src, uint off, uint n)
 
   if(n > 0 && off > ip->size){
     ip->size = off;
-    iupdate(ip);
+    ip->i_func->iupdate(ip);
   }
   return n;
 }

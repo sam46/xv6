@@ -44,14 +44,17 @@ void            iput(struct inode*);
 void            ilock(struct inode*);
 void            iunlock(struct inode*);
 void            iunlockput(struct inode*);
-void            iupdate(struct inode*);
 int             namecmp(const char*, const char*);
 struct inode*   namei(char*);
 struct inode*   nameiparent(char*, char*);
 void            stati(struct inode*, struct stat*);
-// fs-specific functions that are accessed through inode->i_func
+
+// fs-specific functions that should only be accessed through inode->i_func
 int             fs_readi(struct inode*, char*, uint, uint);
 int             fs_writei(struct inode*, char*, uint, uint);
+void            fs_ipopulate(struct inode* ip);
+void            fs_iupdate(struct inode*);
+
 
 
 // ide.c
