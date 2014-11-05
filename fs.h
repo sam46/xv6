@@ -8,6 +8,7 @@
 // Then sb.nblocks data blocks.
 // Then sb.nlog log blocks.
 
+#define NDIRECT 12
 #define ROOTINO 1  // root i-number
 #define BSIZE 512  // block size
 
@@ -19,7 +20,6 @@ struct superblock {
   uint nlog;         // Number of log blocks
 };
 
-#define NDIRECT 12
 #define NINDIRECT (BSIZE / sizeof(uint))
 #define MAXFILE (NDIRECT + NINDIRECT)
 

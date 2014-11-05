@@ -8,6 +8,13 @@ struct file {
   uint off;
 };
 
+struct inode_functions {  
+  void (*ipopulate)(struct inode*);  
+  int (*readi)(struct inode*, char*, uint, uint);
+  int (*writei)(struct inode*, char*, uint, uint);
+}; 
+
+#define NDIRECT 12
 
 // in-memory copy of an inode
 struct inode {
@@ -15,6 +22,8 @@ struct inode {
   uint inum;          // Inode number
   int ref;            // Reference count
   int flags;          // I_BUSY, I_VALID
+
+  struct inode_functions *i_func;
 
   short type;         // copy of disk inode
   short major;
