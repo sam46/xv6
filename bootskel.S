@@ -9,7 +9,7 @@ _start:
 	int $0x10
 
 stop:
-	jmp start
+	jmp stop
 
 .org 0x01fe
  .word 0xAA55
