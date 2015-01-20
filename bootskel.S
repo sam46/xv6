@@ -9,7 +9,7 @@ _start:
 	int $0x10
 
 stop:
-	jmp start
+	jmp stop
 
 thestring:
 	.string "Hello World"
