@@ -8,6 +8,8 @@
 #include "fs.h"
 #include "file.h"
 #include "spinlock.h"
+#include "mmu.h"
+#include "int32.h"
 
 struct devsw devsw[NDEV];
 struct {
@@ -79,8 +81,20 @@ fileclose(struct file *f)
 }
 
 int
-fileioctl(struct file *f, int param, int value) {
+fileioctl(struct file *f, int param, int value) {  
   cprintf("Got IOCTL for dev=%d, major=%d, minor=%d, %d=%d\n",f->ip->dev,(int)f->ip->major,(int)f->ip->minor,param,value);
+
+  if(f->ip->major == 1) {
+  }
+  if(f->ip->major == 2) {
+    if(param==1) {
+      regs16_t regs;
+      memset(&regs,0,sizeof(regs));
+      regs.ax=0xff & ((char)value);
+      bios_int(0x10,&regs);
+    }    
+  }
+  
   return 0;
 }
 
