@@ -101,6 +101,22 @@ sys_close(void)
 }
 
 int
+sys_ioctl(void) 
+{
+  int fd, param, value;
+  struct file *f;
+  
+  if(argfd(0, &fd, &f) < 0)
+    return -1;
+  if(argint(1, &param) < 0)
+    return -1;
+  if(argint(2, &value) < 0)
+    return -1;
+  
+  return fileioctl(f,param,value);
+}
+
+int
 sys_fstat(void)
 {
   struct file *f;

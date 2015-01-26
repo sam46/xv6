@@ -16,8 +16,14 @@ main(void)
     mknod("console", 1, 1);
     open("console", O_RDWR);
   }
+
   dup(0);  // stdout
   dup(0);  // stderr
+
+  if(open("display", O_RDWR) < 0){
+    mknod("display", 2, 1);
+    open("display", O_RDWR);
+  }
 
   for(;;){
     printf(1, "init: starting sh\n");

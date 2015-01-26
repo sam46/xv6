@@ -27,6 +27,7 @@ int             exec(char*, char**);
 // file.c
 struct file*    filealloc(void);
 void            fileclose(struct file*);
+int             fileioctl(struct file*, int, int);
 struct file*    filedup(struct file*);
 void            fileinit(void);
 int             fileread(struct file*, char*, int n);
