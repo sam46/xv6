@@ -165,6 +165,7 @@ UPROGS=\
 	_forktest\
 	_grep\
 	_init\
+	_imshow\
 	_kill\
 	_ln\
 	_ls\
