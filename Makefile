@@ -6,6 +6,7 @@ OBJS = \
 	file.o\
 	fs.o\
 	ide.o\
+	bios_int.o\
 	ioapic.o\
 	kalloc.o\
 	kbd.o\
