@@ -15,7 +15,10 @@ int main(int argc, char** argv) {
   }  
 
   // switch modes to VGA 0x13
-  ioctl(fd,1,0x13);  
+  if(ioctl(fd,1,0x13) < 0) {
+    printf(2,"error: ioctl to switch to VGA mode failed.\n");
+    exit();
+  }
 
   int k;
   char buf[1000];
@@ -33,7 +36,11 @@ int main(int argc, char** argv) {
 
   sleep(100);
   // switch back to text
-  ioctl(fd,1,0x3);
+
+  if(ioctl(fd,1,0x3) < 0) {
+    printf(2,"error: ioctl to restore screen to text failed.\n");
+    exit();
+  }
 
   exit();
   return 0;
