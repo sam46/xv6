@@ -36,11 +36,34 @@ int main(int argc, char** argv) {
 
   sleep(100);
 
-  // the value is a 32-bit struct containing (palette#, R, G, B)
-  if(ioctl(fd,2,0x0f<<24 | 60 << 16 | 0 << 8 | 0 ) < 0) {
-    printf(2,"Error setting palette color.\n");
+  int beats;
+  for(beats=0;beats<8;beats++) {
+
+    int fade;
+    for(fade=63;fade>0;fade-=3) {
+      
+      // the value is a 32-bit struct containing (palette#, R, G, B)
+      if(ioctl(fd,2,0x0f<<24 | 63 << 16 | fade << 8 | fade ) < 0) {
+        printf(2,"Error setting palette color.\n");
+      }
+      sleep(1);
+    }
+    for(fade=0;fade<63;fade+=3) {
+      if(ioctl(fd,2,0x0f<<24 | 63 << 16 | fade << 8 | fade ) < 0) {
+        printf(2,"Error setting palette color.\n");
+      }
+      sleep(1);
+    }
+
+    if(ioctl(fd,2,0x0f<<24 | 63 << 16 | 63 << 8 | 63 ) < 0) {
+      printf(2,"Error setting palette color.\n");
+    }
+
+    if(beats%2)
+      sleep(100);
+    else
+      sleep(10);    
   }
-  sleep(100);
 
   // switch back to text
   if(ioctl(fd,1,0x3) < 0) {
