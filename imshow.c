@@ -35,8 +35,14 @@ int main(int argc, char** argv) {
   }
 
   sleep(100);
-  // switch back to text
 
+  // the value is a 32-bit struct containing (palette#, R, G, B)
+  if(ioctl(fd,2,0x0f<<24 | 60 << 16 | 0 << 8 | 0 ) < 0) {
+    printf(2,"Error setting palette color.\n");
+  }
+  sleep(100);
+
+  // switch back to text
   if(ioctl(fd,1,0x3) < 0) {
     printf(2,"error: ioctl to restore screen to text failed.\n");
     exit();

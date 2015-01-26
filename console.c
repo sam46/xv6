@@ -262,7 +262,7 @@ consoleread(struct file *f, char *dst, int n)
 
 int
 consoleioctl(struct file *f, int param, int value) {  
-  cprintf("Got console ioctl request. %d = %d\n",param,value);
+  cprintf("Got unknown console ioctl request. %d = %d\n",param,value);
   return -1;
 }
 
