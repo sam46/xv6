@@ -1,11 +1,11 @@
 #include"types.h"
 #include "user.h"
+#include "fcntl.h"
 
-char buf[64000];
 
 int main(int argc, char** argv) {
   int fd;
-  if( (fd = open("display",0)) == 0) {
+  if( (fd = open("display",O_WRONLY)) == 0) {
     exit();
   }
 
@@ -13,23 +13,28 @@ int main(int argc, char** argv) {
   if( (img = open("cover.raw",0)) == 0) {
     exit();
   }  
-  int readbytes = read(img,buf,64000);
-  if(readbytes!=64000) {
-    printf(1,"Huh, only read %d bytes from file\n",readbytes);
-  }
 
   // switch modes to VGA 0x13
   ioctl(fd,1,0x13);  
-  
-  int wrotebytes = write(fd,buf,64000);
-  sleep(100);
 
+  int k;
+  char buf[1000];
+  for(k=0;k<64;k++) {
+    int readbytes = read(img,buf,1000);
+    if(readbytes!=1000) {
+      printf(1,"Huh, only read %d bytes from file\n",readbytes);
+    }
+  
+    int wrotebytes = write(fd,buf,1000);   
+    if(wrotebytes!=1000) {
+      printf(1,"Huh, only wrote %d bytes to display\n",wrotebytes);
+    }
+  }
+
+  sleep(100);
   // switch back to text
   ioctl(fd,1,0x3);
 
-  if(wrotebytes!=64000) {
-    printf(1,"Huh, only wrote %d bytes to display\n",wrotebytes);
-  }
   exit();
   return 0;
 }
