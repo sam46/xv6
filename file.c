@@ -5,11 +5,11 @@
 #include "types.h"
 #include "defs.h"
 #include "param.h"
+#include "stat.h"
 #include "fs.h"
 #include "file.h"
 #include "spinlock.h"
 #include "mmu.h"
-#include "int32.h"
 
 struct devsw devsw[NDEV];
 struct {
@@ -84,18 +84,13 @@ int
 fileioctl(struct file *f, int param, int value) {  
   cprintf("Got IOCTL for dev=%d, major=%d, minor=%d, %d=%d\n",f->ip->dev,(int)f->ip->major,(int)f->ip->minor,param,value);
 
-  if(f->ip->major == 1) {
-  }
-  if(f->ip->major == 2) {
-    if(param==1) {
-      regs16_t regs;
-      memset(&regs,0,sizeof(regs));
-      regs.ax=0xff & ((char)value);
-      bios_int(0x10,&regs);
-    }    
+  switch(f->ip->major) {
+  case CONSOLE:
+    consoleioctl(f,param,value);
+    return 0;
   }
   
-  return 0;
+  return -1;
 }
 
 // Get metadata about file f.
@@ -121,7 +116,14 @@ fileread(struct file *f, char *addr, int n)
     return -1;
   if(f->type == FD_PIPE)
     return piperead(f->pipe, addr, n);
-  if(f->type == FD_INODE){
+  if(f->type == FD_INODE) {
+
+    if(f->ip->type == T_DEV){
+      if(f->ip->major < 0 || f->ip->major >= NDEV || !devsw[f->ip->major].read)
+        return -1;
+      return devsw[f->ip->major].read(f, addr, n);
+    }
+
     ilock(f->ip);
     if((r = readi(f->ip, addr, f->off, n)) > 0)
       f->off += r;
@@ -140,15 +142,22 @@ filewrite(struct file *f, char *addr, int n)
 
   if(f->writable == 0)
     return -1;
+
   if(f->type == FD_PIPE)
     return pipewrite(f->pipe, addr, n);
   if(f->type == FD_INODE){
+
+    if(f->ip->type == T_DEV){
+      if(f->ip->major < 0 || f->ip->major >= NDEV || !devsw[f->ip->major].write)
+        return -1;
+      return devsw[f->ip->major].write(f, addr, n);
+    }
+
+
     // write a few blocks at a time to avoid exceeding
     // the maximum log transaction size, including
     // i-node, indirect block, allocation blocks,
     // and 2 blocks of slop for non-aligned writes.
-    // this really belongs lower down, since writei()
-    // might be writing a device like the console.
     int max = ((LOGSIZE-1-1-2) / 2) * 512;
     int i = 0;
     while(i < n){

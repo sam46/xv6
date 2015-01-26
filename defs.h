@@ -19,6 +19,7 @@ void            bwrite(struct buf*);
 void            consoleinit(void);
 void            cprintf(char*, ...);
 void            consoleintr(int(*)(void));
+int             consoleioctl(struct file *,int,int);
 void            panic(char*) __attribute__((noreturn));
 
 // exec.c
