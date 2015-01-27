@@ -1,6 +1,5 @@
 OBJS = \
 	bio.o\
-	bios_int.o\
 	console.o\
 	exec.o\
 	file.o\
