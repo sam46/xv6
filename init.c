@@ -18,7 +18,9 @@ main(void)
   }
 
   dup(0);  // stdout
-  dup(0);  // stderr
+//  dup(0);  // stderr
+  open("console", O_RDWR); // stderr
+
 
   if(open("display", O_RDWR) < 0){
     mknod("display", 2, 1);
