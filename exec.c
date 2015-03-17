@@ -86,6 +86,8 @@ exec(char *path, char **argv)
       last = s+1;
   safestrcpy(current->proc->name, last, sizeof(current->proc->name));
 
+  killsiblingthreads();
+
   // Commit to the user image.
   oldpgdir = current->proc->pgdir;
   current->proc->pgdir = pgdir;
@@ -93,7 +95,6 @@ exec(char *path, char **argv)
   
   current->tf->eip = elf.entry;  // main
   current->tf->esp = sp;
-  killsiblingthreads();
 
   switchuvm(current->proc);
   freevm(oldpgdir);
