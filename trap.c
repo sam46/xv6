@@ -32,6 +32,15 @@ idtinit(void)
   lidt(idt, sizeof(idt));
 }
 
+
+void
+checksignals(struct trapframe *tf) {
+  if(proc && proc->signal_pending) {
+    cprintf("got a signal, exiting\n");
+    exit();
+  }
+}
+
 //PAGEBREAK: 41
 void
 trap(struct trapframe *tf)

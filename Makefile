@@ -172,6 +172,10 @@ UPROGS=\
 	_usertests\
 	_wc\
 	_zombie\
+	_alarmtest\
+	_alarmtest2\
+	_alarmtest3\
+	_helloloop	
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)

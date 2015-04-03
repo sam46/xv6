@@ -30,10 +30,47 @@ int
 sys_kill(void)
 {
   int pid;
+  int signum;
 
   if(argint(0, &pid) < 0)
     return -1;
-  return kill(pid);
+  if(argint(1, &signum) < 0)
+    return -1;
+  return kill(pid, signum);
+}
+
+int
+sys_alarm(void) {
+  int secs;
+  if(argint(0, &secs) < 0)
+    return -1;
+  alarm(secs);
+  return 0;
+}
+
+int sys_signal(void) {
+  int signum;
+  void (*handler)(int);
+  
+  if(argint(0, &signum) < 0)
+    return -1;
+  if(argint(1, (int*)&handler) < 0)
+    return -1;
+
+  signal(signum,handler);
+  return 0;
+}
+
+int
+sys_sigret(void) {
+  cprintf("In sys_sigret\n");
+  return 0;
+}
+
+int 
+sys_fgproc(void) {
+  cprintf("In sys_fgproc\n");
+  return 0;
 }
 
 int

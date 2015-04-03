@@ -108,7 +108,7 @@ struct proc*    copyproc(struct proc*);
 void            exit(void);
 int             fork(void);
 int             growproc(int);
-int             kill(int);
+int             kill(int,int);
 void            pinit(void);
 void            procdump(void);
 void            scheduler(void) __attribute__((noreturn));
@@ -118,6 +118,11 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+
+void            alarm(int);
+void            check_alarms(void);
+void            signal(int, void (*)(int));
+void            fgproc(int);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

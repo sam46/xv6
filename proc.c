@@ -46,6 +46,9 @@ allocproc(void)
 
 found:
   p->state = EMBRYO;
+  p->alarm_pending_tick = 0;
+  p->signal_pending = 0;
+  memset(p->sig_disp,0,sizeof(p->sig_disp));
   p->pid = nextpid++;
   release(&ptable.lock);
 
@@ -404,26 +407,38 @@ wakeup(void *chan)
   release(&ptable.lock);
 }
 
-// Kill the process with the given pid.
-// Process won't exit until it returns
-// to user space (see trap in trap.c).
+
+void
+alarm(int secs) {
+  cprintf("alarm did nothing\n");
+}
+
+void
+signal(int signum, void (*handler)(int)) {
+  cprintf("In signal(), with number %d and handler %x\n",signum,(int)handler);
+}
+
+// Signal the process with the given pid and signal
 int
-kill(int pid)
+kill(int pid, int signal)
 {
   struct proc *p;
 
   acquire(&ptable.lock);
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) { 
     if(p->pid == pid){
       p->killed = 1;
+      
       // Wake process from sleep if necessary.
       if(p->state == SLEEPING)
         p->state = RUNNABLE;
       release(&ptable.lock);
+      
       return 0;
     }
   }
   release(&ptable.lock);
+  
   return -1;
 }
 
