@@ -46,9 +46,7 @@ allocproc(void)
 
 found:
   p->state = EMBRYO;
-  p->alarm_pending_tick = 0;
   p->signal_pending = 0;
-  memset(p->sig_disp,0,sizeof(p->sig_disp));
   p->pid = nextpid++;
   release(&ptable.lock);
 
