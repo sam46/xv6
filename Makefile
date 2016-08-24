@@ -53,7 +53,7 @@ endif
 # If the makefile can't find QEMU, specify its path here
 # QEMU = qemu-system-i386
 
-# Try to infer the correct QEMU 
+# Try to infer the correct QEMU
 ifndef QEMU
 QEMU = $(shell if which qemu > /dev/null; \
 	then echo qemu; exit; \
