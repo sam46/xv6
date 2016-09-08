@@ -89,31 +89,6 @@ mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
   return 0;
 }
 
-pte_t original8k;
-pte_t biosmap() {   
-  // find or create the page table entry we need to hold our code temporarily  
-  struct proc* p = proc;
-  pde_t* pgdir = p->pgdir;
-  pte_t* va7c00 = walkpgdir(pgdir,(void*)0x7c00,1); 
-  // save the old one just in case there was something useful there
-  pte_t original = *va7c00;
-
-  *va7c00 = (0x7c00 & ~0xfff) | PTE_P | PTE_W | PTE_U; // identity mapping for the page containing 7c00
-
-  pte_t* va8000 = walkpgdir(pgdir,(void*)0x8000,1); 
-  original8k=*va8000;
-  *va8000 = (0x8000 & ~0xfff) | PTE_P | PTE_W | PTE_U; // identity mapping for the page containing 8000
-
-  return original;
-}
-
-void biosunmap(pte_t original) {
-  pte_t* va7c00 = walkpgdir(proc->pgdir,(void*)0x7c00,1); 
-  *va7c00 = original;
-  pte_t* va8000 = walkpgdir(proc->pgdir,(void*)0x8000,1); 
-  *va8000 = original8k;
-}
-
 // There is one page table per process, plus one that's used when
 // a CPU is not running any process (kpgdir). The kernel uses the
 // current process's page table during system calls and interrupts;
