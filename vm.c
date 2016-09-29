@@ -64,6 +64,22 @@ walkpgdir(pde_t *pgdir, const void *va, int alloc)
   return &pgtab[PTX(va)];
 }
 
+/* deduplicate pages between process virtual address vstart and virtual address vend */
+void
+dedup(void *vstart, void *vend) {
+  cprintf("didn't dedup anything\n");
+  return;
+}
+
+/* maybe perform copy-on-write on the page that contains virtual address v. 
+   returns 1 if copy-on-write was performed, 0 otherwise. */
+int
+copyonwrite(char* v)
+{
+  cprintf("didn't copyonwrite anything\n");
+  return 0;
+}
+
 // Create PTEs for virtual addresses starting at va that refer to
 // physical addresses starting at pa. va and size might not
 // be page-aligned.
@@ -265,7 +281,7 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
       if(pa == 0)
         panic("kfree");
       char *v = p2v(pa);
-      kfree(v);
+      krelease(v);
       *pte = 0;
     }
   }
@@ -285,10 +301,10 @@ freevm(pde_t *pgdir)
   for(i = 0; i < NPDENTRIES; i++){
     if(pgdir[i] & PTE_P){
       char * v = p2v(PTE_ADDR(pgdir[i]));
-      kfree(v);
+      krelease(v);
     }
   }
-  kfree((char*)pgdir);
+  krelease((char*)pgdir);
 }
 
 // Clear PTE_U on a page. Used to create an inaccessible

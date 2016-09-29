@@ -158,6 +158,8 @@ mkfs: mkfs.c fs.h
 
 UPROGS=\
 	_cat\
+	_dedup_reader\
+	_dedup_writer\
 	_echo\
 	_forktest\
 	_grep\

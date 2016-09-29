@@ -89,3 +89,16 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+int
+sys_dedup(void)
+{
+  dedup(0,(void*)proc->sz);
+  return 0;
+}
+
+int
+sys_freepages(void)
+{
+  return kfreepagecount();
+}

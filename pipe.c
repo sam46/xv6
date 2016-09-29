@@ -47,7 +47,7 @@ pipealloc(struct file **f0, struct file **f1)
 //PAGEBREAK: 20
  bad:
   if(p)
-    kfree((char*)p);
+    krelease((char*)p);
   if(*f0)
     fileclose(*f0);
   if(*f1)
@@ -68,7 +68,7 @@ pipeclose(struct pipe *p, int writable)
   }
   if(p->readopen == 0 && p->writeopen == 0){
     release(&p->lock);
-    kfree((char*)p);
+    krelease((char*)p);
   } else
     release(&p->lock);
 }
