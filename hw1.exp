@@ -21,7 +21,7 @@ set max 100
 set score 0
 set log "\nHW1 Evaluation:\n"
 set qs_full_score 10
-set qs_partial_score 5
+global tuple
 
 for {set i 1} {$i <= $testcases} {incr i 1} {
    expect -re $1ST_LEVEL_PROMPT 
@@ -31,44 +31,28 @@ for {set i 1} {$i <= $testcases} {incr i 1} {
    send -- "divide $n1 $n2\r"
    expect "is *\r"
 
-   set n1 [format "%.2f" $n1]
-   set n2 [format "%.2f" $n2]
-   if { $n2 != 0 } {
-      set res1 [expr $n1 / $n2]
-      set res1 [expr {int(100*$res1)/100.0}]
-   } else {
-      set res1 "undefined"
+   set res [lindex [split $expect_out(0,string)] 1]
+   if {![catch {expr {abs($res)}}]} {
+      incr tuple(ID)
+      set id $tuple(ID)
+      set tuple($id,num1) $n1
+      set tuple($id,num2) $n2
+      set tuple($id,res) $res
    }
 
-   set isnum 1
-   set res2 [lindex [split $expect_out(0,string)] 1]
-   if {![catch {expr {abs($res2)}}]} {
-      if { $res1 == $res2 } {
-         set score [expr $score + $qs_full_score]
-      } else {
-         set abs_res1 [expr {round($res1)}]
-         set abs_res2 [expr {round($res2)}]
-         # Both the floor & ceiling is taken care of for partial marking
-         if { ($abs_res1 == $abs_res2) || (($abs_res1 - $abs_res2) == 1) } {
-            set score [expr $score + $qs_partial_score]
-         }
-      }
-   } else {
-      # Divide by zero
-      if { ($n2 == 0) && ($res1 == $res2) } {
-         set score [expr $score + $qs_full_score]
-      } else {
-         set isnum 0
-      }
-   }
-
-   if { $isnum == 1 } {
-      append log "$i. Expected Outcome: $res1, Actual Outcome: $res2, Score: $score\n"
-   } else {
-      append log "$i. Expected Outcome: $res1, Actual Outcome: not available, Score: $score\n"
-   }
 }
 
 exec kill -9 $pid
-puts $log
+
+for {set i 1} {$i <= $testcases} {incr i 1} {
+   spawn ./solution_divide $tuple($i,num1) $tuple($i,num2)
+   expect "is *\r"
+   set res [lindex [split $expect_out(0,string)] 1]
+
+   if { $res == $tuple($i,res) } {
+      set score [expr $score + $qs_full_score]
+   } 
+   puts "$i. Expected Outcome: $res, Actual Outcome: $tuple($i,res), Score: $score"
+}
+
 puts "Final Score: $score"
