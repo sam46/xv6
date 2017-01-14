@@ -32,14 +32,18 @@ for {set i 1} {$i <= $testcases} {incr i 1} {
    expect "is *\r"
 
    set res [lindex [split $expect_out(0,string)] 1]
-   if {![catch {expr {abs($res)}}]} {
-      incr tuple(ID)
-      set id $tuple(ID)
-      set tuple($id,num1) $n1
-      set tuple($id,num2) $n2
-      set tuple($id,res) $res
-   }
+   incr tuple(ID)
+   set id $tuple(ID)
+   set tuple($id,num1) $n1
+   set tuple($id,num2) $n2
 
+   if {![catch {expr {abs($res)}}]} {
+      set tuple($id,res) $res
+      set tuple($id,str_res) ""
+   } else {
+      set tuple($id,res) 0
+      set tuple($id,str_res) $res
+   }
 }
 
 exec kill -9 $pid
@@ -52,8 +56,11 @@ if {[array exist tuple]} {
 
       if { $res == $tuple($i,res) } {
          set score [expr $score + $qs_full_score]
-      } 
-      puts "$i. Expected Outcome: $res, Actual Outcome: $tuple($i,res), Score: $score"
+         puts "$i. Expected Outcome: $res, Actual Outcome: $tuple($i,res), Score: $score"
+      } elseif { $res == $tuple($i,str_res) } {
+         set score [expr $score + $qs_full_score]
+         puts "$i. Expected Outcome: $res, Actual Outcome: $tuple($i,str_res), Score: $score"
+      }
    }
 } else {
    puts "Test cannot be executed!"
