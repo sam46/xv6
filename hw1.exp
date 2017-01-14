@@ -44,15 +44,19 @@ for {set i 1} {$i <= $testcases} {incr i 1} {
 
 exec kill -9 $pid
 
-for {set i 1} {$i <= $testcases} {incr i 1} {
-   spawn ./solution_divide $tuple($i,num1) $tuple($i,num2)
-   expect "is *\r"
-   set res [lindex [split $expect_out(0,string)] 1]
+if {[array exist tuple]} {
+   for {set i 1} {$i <= $testcases} {incr i 1} {
+      spawn ./solution_divide $tuple($i,num1) $tuple($i,num2)
+      expect "is *\r"
+      set res [lindex [split $expect_out(0,string)] 1]
 
-   if { $res == $tuple($i,res) } {
-      set score [expr $score + $qs_full_score]
-   } 
-   puts "$i. Expected Outcome: $res, Actual Outcome: $tuple($i,res), Score: $score"
+      if { $res == $tuple($i,res) } {
+         set score [expr $score + $qs_full_score]
+      } 
+      puts "$i. Expected Outcome: $res, Actual Outcome: $tuple($i,res), Score: $score"
+   }
+} else {
+   puts "Test cannot be executed!"
 }
 
 puts "Final Score: $score"
