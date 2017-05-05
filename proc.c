@@ -416,6 +416,14 @@ signal(int signum, void (*handler)(int)) {
   cprintf("In signal(), with number %d and handler %x\n",signum,(int)handler);
 }
 
+void
+checksignals(struct trapframe *tf) {
+  if(proc && proc->signal_pending) {
+    cprintf("got a signal, exiting\n");
+    exit();
+  }
+}
+
 // Signal the process with the given pid and signal
 int
 kill(int pid, int signal)

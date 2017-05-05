@@ -8,6 +8,7 @@ struct rtcdate;
 struct spinlock;
 struct stat;
 struct superblock;
+struct trapframe;
 
 // bio.c
 void            binit(void);
@@ -122,6 +123,7 @@ void            yield(void);
 void            alarm(int);
 void            check_alarms(void);
 void            signal(int, void (*)(int));
+void            checksignals(struct trapframe *);
 void            fgproc(int);
 
 // swtch.S
