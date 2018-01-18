@@ -276,6 +276,12 @@ tar:
 	cp dist/* dist/.gdbinit.tmpl /tmp/xv6
 	(cd /tmp; tar cf - xv6) | gzip >xv6-rev9.tar.gz
 
+bootskel.img: bootskel.S
+	as bootskel.S -o bootskel.o
+	ld -Ttext=0x7c00 -e start bootskel.o -o bootskellinked.o
+	objcopy -O binary bootskellinked.o bootskel.img
+
+
 .PHONY: dist-test dist
 
 test:
