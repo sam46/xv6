@@ -1,13 +1,10 @@
-.code16
+# custom boot sector
+# run ./hw2.sh to make and run
+
+.code16                    # Assemble for 16-bit mode
 .globl start
 start:
-_start:
-	movb $0x0e,%ah
-        movb thestring,%al
-	movb $0,%bh
-	movb $7,%bl
-	int $0x10
-
+  cli                      # BIOS enabled interrupts; disable
 # print to screen
   mov $msg-1, %si
 loop:
@@ -53,10 +50,7 @@ print: # pass char to print in %al
   ret
 
 stop:
-	jmp stop
+  jmp stop
 
-thestring:
-	.string "Hello World"
-
-.org 0x01fe
- .word 0xAA55
+.org 0x1fe
+.word 0xaa55
