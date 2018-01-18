@@ -172,6 +172,8 @@ UPROGS=\
 	_usertests\
 	_wc\
 	_zombie\
+	_divide
+
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
@@ -241,7 +243,7 @@ qemu-nox-gdb: fs.img xv6.img .gdbinit
 EXTRA=\
 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
 	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c\
-	printf.c umalloc.c\
+	printf.c umalloc.c divide.c \
 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\
 
@@ -272,12 +274,15 @@ tar:
 	rm -rf /tmp/xv6
 	mkdir -p /tmp/xv6
 	cp dist/* dist/.gdbinit.tmpl /tmp/xv6
-	(cd /tmp; tar cf - xv6) | gzip >xv6-rev30.tar.gz
+	(cd /tmp; tar cf - xv6) | gzip >xv6-rev9.tar.gz
 
 bootskel.img: bootskel.S
-	@echo 'building bootskel.img'
 	as bootskel.S -o bootskel.o
 	ld -Ttext=0x7c00 -e start bootskel.o -o bootskellinked.o
 	objcopy -O binary bootskellinked.o bootskel.img
 
+
 .PHONY: dist-test dist
+
+test:
+	expect hw1.exp
