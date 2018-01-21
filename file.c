@@ -36,6 +36,7 @@ filealloc(void)
       release(&ftable.lock);
       return f;
     }
+    f->color = 0x7;
   }
   release(&ftable.lock);
   return 0;
@@ -152,7 +153,6 @@ filewrite(struct file *f, char *addr, int n)
       return devsw[f->ip->major].write(f, addr, n);
     }
 
-
     // write a few blocks at a time to avoid exceeding
     // the maximum log transaction size, including
     // i-node, indirect block, allocation blocks,
@@ -163,7 +163,6 @@ filewrite(struct file *f, char *addr, int n)
       int n1 = n - i;
       if(n1 > max)
         n1 = max;
-
       begin_op();
       ilock(f->ip);
       if ((r = writei(f->ip, addr + i, f->off, n1)) > 0)

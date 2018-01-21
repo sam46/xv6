@@ -14,8 +14,8 @@
 #include "proc.h"
 #include "x86.h"
 
-static void consputc(int);
-
+static int glb_color = 0x7;
+static void consputc(int, int);
 static int panicked = 0;
 
 static struct {
@@ -45,7 +45,7 @@ printint(int xx, int base, int sign)
     buf[i++] = '-';
 
   while(--i >= 0)
-    consputc(buf[i]);
+    consputc(buf[i], 0x7);
 }
 //PAGEBREAK: 50
 
@@ -67,7 +67,7 @@ cprintf(char *fmt, ...)
   argp = (uint*)(void*)(&fmt + 1);
   for(i = 0; (c = fmt[i] & 0xff) != 0; i++){
     if(c != '%'){
-      consputc(c);
+      consputc(c, 0x7);
       continue;
     }
     c = fmt[++i] & 0xff;
@@ -85,15 +85,15 @@ cprintf(char *fmt, ...)
       if((s = (char*)*argp++) == 0)
         s = "(null)";
       for(; *s; s++)
-        consputc(*s);
+        consputc(*s, 0x7);
       break;
     case '%':
-      consputc('%');
+      consputc('%', 0x7);
       break;
     default:
       // Print unknown % sequence to draw attention.
-      consputc('%');
-      consputc(c);
+      consputc('%', 0x7);
+      consputc(c, 0x7);
       break;
     }
   }
@@ -127,10 +127,12 @@ panic(char *s)
 static ushort *crt = (ushort*)P2V(0xb8000);  // CGA memory
 
 static void
-cgaputc(int c)
+cgaputc(int c, int color)
 {
+  if(color < 0 || color > 0xf) 
+    color = 0x7;
+
   int pos;
-  
   // Cursor position: col + 80*row.
   outb(CRTPORT, 14);
   pos = inb(CRTPORT+1) << 8;
@@ -142,7 +144,7 @@ cgaputc(int c)
   else if(c == BACKSPACE){
     if(pos > 0) --pos;
   } else
-    crt[pos++] = (c&0xff) | 0x0700;  // black on white
+    crt[pos++] = (c&0xff) | ((color<<8) & 0xff00);  // black on white
   
   if((pos/80) >= 24){  // Scroll up.
     memmove(crt, crt+80, sizeof(crt[0])*23*80);
@@ -158,7 +160,7 @@ cgaputc(int c)
 }
 
 void
-consputc(int c)
+consputc(int c, int color)
 {
   if(panicked){
     cli();
@@ -170,7 +172,7 @@ consputc(int c)
     uartputc('\b'); uartputc(' '); uartputc('\b');
   } else
     uartputc(c);
-  cgaputc(c);
+  cgaputc(c, color);
 }
 
 #define INPUT_BUF 128
@@ -199,20 +201,20 @@ consoleintr(int (*getc)(void))
       while(input.e != input.w &&
             input.buf[(input.e-1) % INPUT_BUF] != '\n'){
         input.e--;
-        consputc(BACKSPACE);
+        consputc(BACKSPACE, glb_color);
       }
       break;
     case C('H'): case '\x7f':  // Backspace
       if(input.e != input.w){
         input.e--;
-        consputc(BACKSPACE);
+        consputc(BACKSPACE, glb_color);
       }
       break;
     default:
       if(c != 0 && input.e-input.r < INPUT_BUF){
         c = (c == '\r') ? '\n' : c;
         input.buf[input.e++ % INPUT_BUF] = c;
-        consputc(c);
+        consputc(c, glb_color);
         if(c == '\n' || c == C('D') || input.e == input.r+INPUT_BUF){
           input.w = input.e;
           wakeup(&input.r);
@@ -261,9 +263,19 @@ consoleread(struct file *f, char *dst, int n)
 }
 
 int
-consoleioctl(struct file *f, int param, int value) {  
-  cprintf("Got unknown console ioctl request. %d = %d\n",param,value);
-  return -1;
+consoleioctl(struct file *f, int param, int value) { 
+  if((param != 0 && param != 1) || value > 0xf || value < 0x0) 
+  {
+    cprintf("Got unknown console ioctl request. %d = %d\n",param,value);
+    return -1;
+  }
+  acquire(&input.lock); 
+  if(param == 0)
+    f->color = value;
+  else
+    glb_color = value;
+  release(&input.lock);
+  return value;
 }
 
 int
@@ -273,7 +285,7 @@ consolewrite(struct file *f, char *buf, int n)
 
   acquire(&cons.lock);
   for(i = 0; i < n; i++)
-    consputc(buf[i] & 0xff);
+    consputc(buf[i] & 0xff, f->color);
   release(&cons.lock);
 
   return n;
