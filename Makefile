@@ -1,6 +1,7 @@
 OBJS = \
 	bio.o\
 	console.o\
+	display.o\
 	exec.o\
 	file.o\
 	fs.o\
@@ -26,6 +27,7 @@ OBJS = \
 	trap.o\
 	uart.o\
 	vectors.o\
+	vga.o\
 	vm.o\
 
 # Cross-compiling (e.g., on Mac OS X)
@@ -162,10 +164,12 @@ UPROGS=\
 	_forktest\
 	_grep\
 	_init\
+	_imshow\
 	_kill\
 	_ln\
 	_ls\
 	_mkdir\
+	_prettyprint\
 	_rm\
 	_sh\
 	_stressfs\
@@ -175,8 +179,8 @@ UPROGS=\
 	_divide
 
 
-fs.img: mkfs README $(UPROGS)
-	./mkfs fs.img README $(UPROGS)
+fs.img: mkfs README cover.raw $(UPROGS)
+	./mkfs fs.img README cover.raw $(UPROGS)
 
 -include *.d
 

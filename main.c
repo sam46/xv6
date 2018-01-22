@@ -26,6 +26,7 @@ main(void)
   picinit();       // interrupt controller
   ioapicinit();    // another interrupt controller
   consoleinit();   // I/O devices & their interrupts
+  displayinit();
   uartinit();      // serial port
   pinit();         // process table
   tvinit();        // trap vectors
