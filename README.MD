@@ -1,9 +1,23 @@
-for hw2 run: ./hw2.sh
+# My solutions to [CS385](https://www.cs.uic.edu/bin/view/CS385/Homeworks) OS development course at UIC. <br>
+This is a mirror repo based on [xv6.git](http://bits.cs.uic.edu/git/xv6.git)
+<br>
+Hacking on the [xv6](https://en.wikipedia.org/wiki/Xv6) operating system
+
+### PROGRESS
+
+- [x] Simple program (divide) running in xv6. [Branch 1](https://github.com/sam46/xv6/tree/hw1)
+- [x] Custom bootsector with custom splash screen. [Branch 2](https://github.com/sam46/xv6/tree/hw2)
+- [x] Device drivers for console and display. [Branch 3](https://github.com/sam46/xv6/tree/hw3)
+- [ ] mmap: eager and lazy. [Branch 4](https://github.com/sam46/xv6/tree/hw4)
+- [ ] Page table magic: deduplication and copy-on-write. [Branch 5](https://github.com/sam46/xv6/tree/hw5)
+- [ ] Adding threading support to xv6. [Branch 6](https://github.com/sam46/xv6/tree/hw6)
+- [ ] Implementing signals in xv6. [Branch 7](https://github.com/sam46/xv6/tree/hw7)
+
 <br>
 xv6 is a re-implementation of Dennis Ritchie's and Ken Thompson's Unix
 Version 6 (v6).  xv6 loosely follows the structure and style of v6,
 but is implemented for a modern x86-based multiprocessor using ANSI C.
-
+<br>
 ACKNOWLEDGMENTS
 
 xv6 is inspired by John Lions's Commentary on UNIX 6th Edition (Peer
