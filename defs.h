@@ -21,6 +21,15 @@ void            cprintf(char*, ...);
 void            consoleintr(int(*)(void));
 int             consoleioctl(struct file *,int,int);
 void            panic(char*) __attribute__((noreturn));
+void			setCurPos(int pos);
+int 			getCurPos(void);
+void 			showCursor();
+
+// display.c
+void            displayinit(void);
+int             displayioctl(struct file *,int,int);
+// void            displayintr(int(*)(void));
+// void            panic(char*) __attribute__((noreturn));
 
 // exec.c
 int             exec(char*, char**);

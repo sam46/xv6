@@ -126,6 +126,7 @@ panic(char *s)
 #define CRTPORT 0x3d4
 static ushort *crt = (ushort*)P2V(0xb8000);  // CGA memory
 
+
 static void
 cgaputc(int c, int color)
 {
@@ -269,12 +270,14 @@ consoleioctl(struct file *f, int param, int value) {
     cprintf("Got unknown console ioctl request. %d = %d\n",param,value);
     return -1;
   }
+  // acquire(&cons.lock); 
   acquire(&input.lock); 
   if(param == 0)
     f->color = value;
   else
     glb_color = value;
   release(&input.lock);
+  // acquire(&cons.lock); 
   return value;
 }
 
@@ -305,3 +308,36 @@ consoleinit(void)
   ioapicenable(IRQ_KBD, 0);
 }
 
+void showCursor()
+{
+  acquire(&input.lock);
+  outb(0x3D4, 0x0A);
+  outb(0x3D5, (inb(0x3D5) & 0xC0));
+  outb(0x3D4, 0x0B);
+  outb(0x3D5, (inb(0x3E0) & 0xE0));
+  release(&input.lock);
+}
+
+int
+getCurPos() {
+  acquire(&input.lock);
+  int pos;
+  // Cursor position: col + 80*row.
+  outb(CRTPORT, 14);
+  pos = inb(CRTPORT+1) << 8;
+  outb(CRTPORT, 15);
+  pos |= inb(CRTPORT+1);
+  release(&input.lock);
+  return pos;
+}
+
+void
+setCurPos(int pos) 
+{
+  acquire(&input.lock);
+  outb(CRTPORT, 14);
+  outb(CRTPORT+1, pos>>8);
+  outb(CRTPORT, 15);
+  outb(CRTPORT+1, pos);
+  release(&input.lock);
+}

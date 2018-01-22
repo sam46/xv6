@@ -115,6 +115,10 @@ sys_ioctl(void)
   if(argint(2, &value) < 0)
     return -1;
   
+  // if(f->ip == namei("display")) {
+  //   cprintf("\nfound you hehe!!\n\n");
+  // }
+
   return fileioctl(f,param,value);
 }
 
