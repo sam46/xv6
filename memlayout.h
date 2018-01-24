@@ -20,3 +20,5 @@ static inline void *p2v(uint a) { return (void *) ((a) + KERNBASE); }
 
 #define V2P_WO(x) ((x) - KERNBASE)    // same as V2P, but without casts
 #define P2V_WO(x) ((x) + KERNBASE)    // same as V2P, but without casts
+
+#define MMAP_BASE 0x40000000  // beginning of user process mmap region
