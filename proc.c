@@ -175,6 +175,8 @@ exit(void)
   struct proc *p;
   int fd;
 
+  cprintf("Exiting process. System free pages is %d\n",kfreepagecount());
+
   if(proc == initproc)
     panic("init exiting");
 
@@ -462,4 +464,7 @@ procdump(void)
     }
     cprintf("\n");
   }
+
+  cprintf("Free pages: %d\n",kfreepagecount());
+  
 }

@@ -11,6 +11,7 @@
 #include "stat.h"
 #include "param.h"
 
+//#define static_assert(a, b) do { switch (0) case 0: case (a): ; } while (0)
 
 // jakob: recent versions of libc come with a static assert.
 // with any luck, that static_assert is just as good as this one.

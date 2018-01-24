@@ -168,6 +168,9 @@ UPROGS=\
 	_kill\
 	_ln\
 	_ls\
+	_eager_mmap\
+	_lazy_mmap\
+	_bad_mmap\
 	_mkdir\
 	_prettyprint\
 	_rm\
@@ -178,9 +181,8 @@ UPROGS=\
 	_zombie\
 	_divide
 
-
-fs.img: mkfs README cover.raw $(UPROGS)
-	./mkfs fs.img README cover.raw $(UPROGS)
+fs.img: mkfs README cover.raw LARGE $(UPROGS)
+	./mkfs fs.img README cover.raw LARGE $(UPROGS)
 
 -include *.d
 
