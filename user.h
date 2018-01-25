@@ -24,6 +24,7 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 char* mmap(int, int);
+int ioctl(int, int, int);
 
 // ulib.c
 int stat(char*, struct stat*);
