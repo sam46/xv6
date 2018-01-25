@@ -51,6 +51,15 @@ struct context {
 
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
+// Info about a lazy-mmaped file.  
+struct mmap_job {
+  char* beg; // address of beginning of file in mmap region. inclsive
+  char* end; // address of end of file in mmap region (will align to PGSIZE). exclusive
+  // end - beg = a multiple of PGSIZE, always!!
+  int fd;
+  struct file *f;
+};
+
 // Per-process state
 struct proc {
   uint sz;                     // Size of process memory (bytes)
@@ -67,7 +76,10 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
   uint mmap_sz;                // Size of process's mmap region in memory (bytes)
+  struct mmap_job mmjobs[NMMAP]; // lazy-mmaped files
+  int mmjobs_count;              // counter variable, used to index into mmjobs[]. Also keeps track of number of jobs so far 
 };
+
 
 // Process memory is laid out contiguously, low addresses first:
 //   text
