@@ -8,7 +8,7 @@ Hacking on the [xv6](https://en.wikipedia.org/wiki/Xv6) operating system
 - [x] Simple program (divide) running in xv6. [Branch 1](https://github.com/sam46/xv6/tree/hw1)
 - [x] Custom bootsector with custom splash screen. [Branch 2](https://github.com/sam46/xv6/tree/hw2)
 - [x] Device drivers for console and display. [Branch 3](https://github.com/sam46/xv6/tree/hw3)
-- [ ] mmap: eager and lazy. [Branch 4](https://github.com/sam46/xv6/tree/hw4)
+- [x] mmap: eager and lazy. [Branch 4](https://github.com/sam46/xv6/tree/hw4)
 - [ ] Page table magic: deduplication and copy-on-write. [Branch 5](https://github.com/sam46/xv6/tree/hw5)
 - [ ] Adding threading support to xv6. [Branch 6](https://github.com/sam46/xv6/tree/hw6)
 - [ ] Implementing signals in xv6. [Branch 7](https://github.com/sam46/xv6/tree/hw7)
