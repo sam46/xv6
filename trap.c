@@ -86,11 +86,17 @@ trap(struct trapframe *tf)
               tf->trapno, cpu->id, tf->eip, rcr2());
       panic("trap");
     }
+
+    // Pagefault due to lazy mmap. Map the page and load the file
+    if(sys_lazymm((char*)rcr2()) != -1)
+      return;
+
     // In user space, assume process misbehaved.
     cprintf("pid %d %s: trap %d err %d on cpu %d "
             "eip 0x%x addr 0x%x--kill proc\n",
             proc->pid, proc->name, tf->trapno, tf->err, cpu->id, tf->eip, 
             rcr2());
+
     proc->killed = 1;
   }
 

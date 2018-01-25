@@ -70,6 +70,10 @@ found:
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
 
+  // initialize mmap stuff
+  p->mmap_sz = 0;
+  p->mmjobs_count = 0;
+
   return p;
 }
 
